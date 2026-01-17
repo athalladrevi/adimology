@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchWatchlist, fetchEmitenInfo } from '@/lib/stockbit';
 import type { ApiResponse } from '@/lib/types';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const groupId = searchParams.get('groupId');
+
   try {
-    const watchlistData = await fetchWatchlist();
+    const watchlistData = await fetchWatchlist(groupId ? Number(groupId) : undefined);
     
     // Fetch sector for each watchlist item in parallel
     const items = watchlistData.data?.result || [];

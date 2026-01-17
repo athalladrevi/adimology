@@ -158,6 +158,22 @@ export interface WatchlistDetailResponse {
 
 export type WatchlistResponse = WatchlistDetailResponse; // Alias for backward compatibility if needed, or just use WatchlistDetailResponse
 
+export interface WatchlistGroup {
+  watchlist_id: number;
+  name: string;
+  description: string;
+  is_default: boolean;
+  is_favorite: boolean;
+  emoji: string;
+  category_type: string;
+  total_items: number;
+}
+
+export interface WatchlistGroupsResponse {
+  message: string;
+  data: WatchlistGroup[];
+}
+
 export interface EmitenInfoResponse {
   data: {
     sector: string;

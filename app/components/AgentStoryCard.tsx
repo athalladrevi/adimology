@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { AgentStoryResult, MatriksStoryItem, ChecklistKatalis } from '@/lib/types';
 
 interface AgentStoryCardProps {
@@ -11,13 +11,23 @@ interface AgentStoryCardProps {
 
 export default function AgentStoryCard({ stories, status, onRetry }: AgentStoryCardProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const prevStatusRef = useRef(status);
 
-  // Update selectedId when new stories arrive (e.g. latest one finished)
+  // Update selectedId when new stories arrive or when analysis completes
   useEffect(() => {
-    if (stories.length > 0 && !selectedId) {
-      setSelectedId(stories[0].id || null);
+    if (stories.length > 0) {
+      // 1. Initial selection if nothing selected
+      if (!selectedId) {
+        setSelectedId(stories[0].id || null);
+      }
+      
+      // 2. Auto-switch to newest if analysis just finished
+      if (prevStatusRef.current !== 'completed' && status === 'completed') {
+        setSelectedId(stories[0].id || null);
+      }
     }
-  }, [stories]);
+    prevStatusRef.current = status;
+  }, [stories, status, selectedId]);
 
   const data = stories.find(s => s.id === selectedId) || stories[0];
   // Loading state

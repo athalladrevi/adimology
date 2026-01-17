@@ -1,4 +1,4 @@
-import type { MarketDetectorResponse, OrderbookResponse, BrokerData, WatchlistResponse, BrokerSummaryData, EmitenInfoResponse, KeyStatsResponse, KeyStatsData, KeyStatsItem } from './types';
+import type { MarketDetectorResponse, OrderbookResponse, BrokerData, WatchlistResponse, BrokerSummaryData, EmitenInfoResponse, KeyStatsResponse, KeyStatsData, KeyStatsItem, WatchlistGroup } from './types';
 import { getSessionValue, updateTokenLastUsed, invalidateToken } from './supabase';
 
 const STOCKBIT_BASE_URL = 'https://exodus.stockbit.com';
@@ -209,48 +209,55 @@ export async function fetchSectors(): Promise<string[]> {
 
 
 /**
- * Fetch Watchlist data
+ * Fetch all watchlist groups
  */
-export async function fetchWatchlist(): Promise<WatchlistResponse> {
-  // Step 1: Get Watchlist ID
-  const metaUrl = `${STOCKBIT_BASE_URL}/watchlist?page=1&limit=500`;
-  const metaResponse = await fetch(metaUrl, {
+export async function fetchWatchlistGroups(): Promise<WatchlistGroup[]> {
+  const url = `${STOCKBIT_BASE_URL}/watchlist?page=1&limit=500`;
+  const response = await fetch(url, {
     method: 'GET',
     headers: await getHeaders(),
   });
 
-  await handleApiResponse(metaResponse, 'Watchlist Meta API');
+  await handleApiResponse(response, 'Watchlist Groups API');
 
-  const metaJson = await metaResponse.json();
+  const json = await response.json();
+  return Array.isArray(json.data) ? json.data : [];
+}
 
-  const watchlists = Array.isArray(metaJson.data) ? metaJson.data : [metaJson.data];
-  const defaultWatchlist = watchlists.find((w: any) => w.is_default) || watchlists[0];
-  const watchlistId = defaultWatchlist?.watchlist_id;
+/**
+ * Fetch Watchlist data by ID (or default if not provided)
+ */
+export async function fetchWatchlist(watchlistId?: number): Promise<WatchlistResponse> {
+  let id = watchlistId;
 
-  if (!watchlistId) {
-    throw new Error(`No watchlist_id found in response: ${JSON.stringify(metaJson)}`);
+  // If no ID provided, get default watchlist ID
+  if (!id) {
+    const groups = await fetchWatchlistGroups();
+    const defaultGroup = groups.find(w => w.is_default) || groups[0];
+    id = defaultGroup?.watchlist_id;
+    if (!id) throw new Error('No watchlist found');
   }
 
-  // Step 2: Get Watchlist Details
-  const detailUrl = `${STOCKBIT_BASE_URL}/watchlist/${watchlistId}?page=1&limit=500`;
-  const detailResponse = await fetch(detailUrl, {
+  // Fetch watchlist details
+  const detailUrl = `${STOCKBIT_BASE_URL}/watchlist/${id}?page=1&limit=500`;
+  const response = await fetch(detailUrl, {
     method: 'GET',
     headers: await getHeaders(),
   });
 
-  await handleApiResponse(detailResponse, 'Watchlist Detail API');
+  await handleApiResponse(response, 'Watchlist Detail API');
 
-  const detailJson = await detailResponse.json();
+  const json = await response.json();
 
   // Map symbol to company_code for compatibility
-  if (detailJson.data?.result) {
-    detailJson.data.result = detailJson.data.result.map((item: any) => ({
+  if (json.data?.result) {
+    json.data.result = json.data.result.map((item: any) => ({
       ...item,
       company_code: item.symbol || item.company_code
     }));
   }
 
-  return detailJson;
+  return json;
 }
 
 /**
