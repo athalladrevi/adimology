@@ -42,10 +42,14 @@ Ikuti langkah-langkah berikut secara berurutan:
    |--------|------|--------|
    | 1 | `session_table.sql` | Menyimpan token sesi Stockbit |
    | 2 | `stock_queries_table.sql` | Tabel utama riwayat analisis |
-   | 3 | `stock_queries_migration.sql` | Migrasi struktur data |
-   | 4 | `add_sector_column.sql` | Informasi sektor emiten |
-   | 5 | `add_real_harga_column.sql` | Tracking harga H+1 |
-   | 6 | `agent_story_table.sql` | Hasil analisis AI |
+   | 3 | `agent_story_table.sql` | Tabel analisis AI (Gemini) |
+   | 4 | `background_job_logs.sql` | Log eksekusi background jobs |
+   | 5 | `add_emiten_flags.sql` | Tabel flags emiten (OK/NG/Neutral) |
+   | 6 | `stock_queries_migration.sql` | Migrasi struktur data analisis |
+   | 7 | `add_sector_column.sql` | Tambah kolom sektor emiten |
+   | 8 | `add_real_harga_column.sql` | Tambah kolom tracking harga H+1 |
+   | 9 | `add_keystat_signal.sql` | Tambah sinyal investasi di tabel AI |
+   | 10 | `add_token_expiry_tracking.sql` | Tracking validitas & expiry token |
 
 4. Catat kredensial berikut dari **Project Settings > API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
@@ -86,9 +90,9 @@ Ikuti langkah-langkah berikut secara berurutan:
    ]
    ```
 
-4. Edit `background.js` - ganti endpoint dengan URL Netlify Anda:
+4. Edit `background.js` - ganti `APP_API_URL` dengan URL Netlify Anda:
    ```javascript
-   const endpoint = "https://your-app.netlify.app/api/session";
+   const APP_API_URL = "https://your-app.netlify.app/api/update-token";
    ```
 
 5. Install ekstensi di Chrome:
@@ -123,10 +127,14 @@ Ikuti langkah-langkah berikut secara berurutan:
    |--------|------|--------|
    | 1 | `session_table.sql` | Menyimpan token sesi Stockbit |
    | 2 | `stock_queries_table.sql` | Tabel utama riwayat analisis |
-   | 3 | `stock_queries_migration.sql` | Migrasi struktur data |
-   | 4 | `add_sector_column.sql` | Informasi sektor emiten |
-   | 5 | `add_real_harga_column.sql` | Tracking harga H+1 |
-   | 6 | `agent_story_table.sql` | Hasil analisis AI |
+   | 3 | `agent_story_table.sql` | Tabel analisis AI (Gemini) |
+   | 4 | `background_job_logs.sql` | Log eksekusi background jobs |
+   | 5 | `add_emiten_flags.sql` | Tabel flags emiten (OK/NG/Neutral) |
+   | 6 | `stock_queries_migration.sql` | Migrasi struktur data analisis |
+   | 7 | `add_sector_column.sql` | Tambah kolom sektor emiten |
+   | 8 | `add_real_harga_column.sql` | Tambah kolom tracking harga H+1 |
+   | 9 | `add_keystat_signal.sql` | Tambah sinyal investasi di tabel AI |
+   | 10 | `add_token_expiry_tracking.sql` | Tracking validitas & expiry token |
 
 4. Catat kredensial berikut dari **Project Settings > API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
@@ -189,9 +197,9 @@ Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
    ]
    ```
 
-4. Edit `background.js` - set endpoint ke localhost:
+4. Edit `background.js` - set `APP_API_URL` ke localhost:
    ```javascript
-   const endpoint = "http://localhost:3000/api/session";
+   const APP_API_URL = "http://localhost:3000/api/update-token";
    ```
 
 5. Install ekstensi di Chrome:
@@ -217,7 +225,7 @@ Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
 - Pastikan ekstensi sudah di-load dengan benar di `chrome://extensions/`
 - Cek Console di Chrome DevTools (F12) untuk error
 - Pastikan URL di `background.js` sudah benar (Netlify URL atau localhost)
-- Coba refresh halaman Stockbit
+- Coba refresh halaman Stockbit, pastikan login stockbit berhasil
 
 ### CORS Error?
 - Pastikan `host_permissions` di `manifest.json` sudah benar
@@ -250,7 +258,7 @@ Aplikasi akan berjalan di [http://localhost:3000](http://localhost:3000)
 
 ## 🌟 Fitur Utama
 
-- **Analisis Target Cerdas**: Menghitung target harga "Realistis (R1)" dan "Maksimal" berdasarkan rata-rata harga pembelian broker (Avg Bandar).
+- **Analisis Target**: Menghitung target harga "Realistis (R1)" dan "Maksimal" berdasarkan rata-rata harga pembelian broker (Avg Bandar).
 - **History & Watchlist**: Menyimpan riwayat analisis untuk dipantau di kemudian hari.
 - **Tracking Real Harga (H+1)**: Secara otomatis memperbarui harga riil di hari bursa berikutnya untuk memverifikasi apakah target analisis tercapai.
 - **Data Terintegrasi Stockbit**: Mengambil data transaksi broker real-time untuk akurasi tinggi.
