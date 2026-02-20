@@ -8,9 +8,11 @@ Pastikan file di dalam folder ekstensi sudah diubah (bukan lagi file `.example`)
 - **manifest.json**:
   - Pastikan `host_permissions` sudah berisi URL Netlify Anda.
   - Format: `"https://your-app.netlify.app/*"` (harus diakhiri dengan `/*`).
+  ![Supabase Setup](https://raw.githubusercontent.com/bhaktiutama/adimology/main/public/checkpoint07.png)
 - **background.js**:
   - Pastikan variabel `APP_API_URL` sudah mengarah ke URL Netlify Anda + endpoint API.
   - Contoh: `const APP_API_URL = "https://your-app.netlify.app/api/update-token";`.
+  ![Supabase Setup](https://raw.githubusercontent.com/bhaktiutama/adimology/main/public/checkpoint06.png)
 - **Refresh Ekstensi**:
   - Jika Anda baru saja mengubah kode, buka `chrome://extensions/`, klik tombol **Refresh** (ikon putar) pada ekstensi Adimology, lalu refresh halaman Stockbit.
 
